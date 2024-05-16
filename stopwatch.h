@@ -14,19 +14,16 @@
 
 class button {
 private:
-    int xPos;
-    int yPos;
-    int buttonWidth;
-    int buttonHeight;
-    sf::Color colour;
+    sf::Vector2f bPos;
+    sf::Vector2f bSize;
+    sf::Color bColour;
 public:
-    button(int n_buttonWidth, int n_buttonHeight, int n_xPos=0, int n_yPos=0, sf::Color n_colour=sf::Color(0xFFFFFFFF))
-        :xPos(n_xPos), yPos(n_yPos), buttonWidth(n_buttonWidth), buttonHeight(n_buttonHeight), colour(n_colour){};
+    button(sf::Vector2f size, sf::Vector2f position = sf::Vector2f(0, 0), sf::Color n_colour = sf::Color(0xFFFFFFFF))
+        :bSize(size), bPos(position), bColour(n_colour){};
 
     void setPos(sf::Vector2f n_pos);
     void setSize(sf::Vector2f n_size);
     void setColour(sf::Color n_colour);
 
     void paint(sf::RenderWindow& window);
-
 };

@@ -6,3 +6,22 @@
 //-
 
 #include "stopwatch.h"
+
+void button::setPos(sf::Vector2f nPosition){
+    bPos = nPosition;
+}
+
+void button::setSize(sf::Vector2f nSize){
+    bSize = nSize;
+}
+
+void button::setColour(sf::Color nColour){
+    bColour = nColour;
+}
+
+void button::paint(sf::RenderWindow& window){
+    sf::RectangleShape rect(bSize);
+    rect.setPosition(bPos);
+    rect.setFillColor(bColour);
+    window.draw(rect);
+}

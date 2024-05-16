@@ -7,16 +7,22 @@
 
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include "stopwatch.h"
 
 //Konstanten
-const unsigned int width = 900;
-const unsigned int height = 600;
+const unsigned int      width           = 900;
+const unsigned int      height          = 600;
+const unsigned int      buttonWidth     = 300;
+const unsigned int      buttonHeight    = 200;
 
-const int pink = 0xB00B69FF;
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(width, height), "FENSTER!");
     window.setFramerateLimit(60);
+
+    button* startButton     = new button(sf::Vector2f(buttonWidth, buttonHeight), sf::Vector2f(width-buttonWidth, 0),               sf::Color::Green);
+    button* stopButton      = new button(sf::Vector2f(buttonWidth, buttonHeight), sf::Vector2f(width-buttonWidth, buttonHeight),    sf::Color::Red);
+    button* resetButton     = new button(sf::Vector2f(buttonWidth, buttonHeight), sf::Vector2f(width-buttonWidth, 2*buttonHeight),  sf::Color::Blue);
 
     while (window.isOpen())
     {
@@ -29,26 +35,26 @@ int main() {
         }
 
         /* --Loesche Bildschirminhalt. */
-        window.clear(sf::Color(0xFFFFFFFF));
+        window.clear(sf::Color(0x6e6e6eff));
 
         //Circle mit Farbe #B00B69 in der Mitte anzeigen
         unsigned int radius = 255;
         sf::CircleShape circle(radius);
-        circle.setPosition(width/2-radius, height/2-radius);
-        circle.setFillColor(sf::Color(pink));
+        circle.setPosition((width-buttonWidth)/2-radius, height/2-radius);
+        circle.setFillColor(sf::Color::White);
         window.draw(circle);
 
-        unsigned int buttonWidth = 300;
-        unsigned int buttonHeight = 200;
-        sf::RectangleShape buttonStart(sf::Vector2f(buttonWidth, buttonHeight));
-        buttonStart.setPosition(width-buttonWidth, 0);
-        buttonStart.setFillColor(sf::Color::Green);
-        window.draw(buttonStart);
-
+        startButton->paint(window);
+        stopButton->paint(window);
+        resetButton->paint(window);
 
         /* --Aktualisiere Inhalt im Fenster. */
         window.display();
     }
+
+    delete startButton;
+    delete stopButton;
+    delete resetButton;
 
     return 1;
 }
