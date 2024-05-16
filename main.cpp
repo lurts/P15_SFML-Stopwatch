@@ -37,6 +37,7 @@ int main() {
     bool stopwatchActive = false;
     std::chrono::time_point startTime = std::chrono::high_resolution_clock::now();
     unsigned int elapsedTime = 0;
+    unsigned int savedTime = 0;
 
     // Create a font for text
     sf::Font font;
@@ -63,7 +64,7 @@ int main() {
                     sf::Vector2i mousePos = sf::Mouse::getPosition(window);
 
                 //Start button event
-                if (startButton->isMe(mousePos)){
+                if (startButton->isMe(mousePos) && !stopwatchActive){
                     //enable stopwatch and mark start time
                     stopwatchActive = true;
                     startTime = std::chrono::high_resolution_clock::now();
@@ -72,8 +73,10 @@ int main() {
                 }
 
                 //stop button event
-                if (stopButton->isMe(mousePos)){
-                    //disable stopwatch
+                if (stopButton->isMe(mousePos) && stopwatchActive){
+                    //save time in case we want to resume
+                    savedTime = elapsedTime;
+
                     stopwatchActive = false;
 
                     std::cout << "stop" << std::endl;
@@ -82,6 +85,7 @@ int main() {
                 //reset button event, but only when the stopwatch is stopped
                 if (resetButton->isMe(mousePos) && !stopwatchActive){
                     elapsedTime = 0;
+                    savedTime = 0;
 
                     std::cout << "reset" << std::endl;
                 }
@@ -91,6 +95,7 @@ int main() {
         if (stopwatchActive){
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime);
             elapsedTime = duration.count();
+            elapsedTime += savedTime;
         }
 
 
@@ -104,10 +109,29 @@ int main() {
                  sf::Vector2f(50, height - 50),
                  window);
 
+        //Rotate once a second
         drawHand(elapsedTime,
                  sf::Vector2f((width - buttonWidth) / 2, height / 2),
                  window,
-                 sf::Vector2f(10,radius - 50));
+                 sf::Vector2f(10,radius - 50),
+                 sf::Color::Red,
+                 1.0f);
+
+        //rotate once a minute
+        drawHand(elapsedTime,
+                 sf::Vector2f((width - buttonWidth) / 2, height / 2),
+                 window,
+                 sf::Vector2f(10,radius - 50),
+                 sf::Color::Black,
+                 60.0f);
+
+        //rotate once a hour
+        drawHand(elapsedTime,
+                 sf::Vector2f((width - buttonWidth) / 2, height / 2),
+                 window,
+                 sf::Vector2f(10,radius - 50),
+                 sf::Color::Green,
+                 60.0f*60.0f);
 
         startButton->paint(window);
         stopButton->paint(window);

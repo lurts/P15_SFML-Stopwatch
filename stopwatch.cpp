@@ -18,17 +18,17 @@ const std::string fontPath = "C:/Windows/Fonts/arial.ttf";
 const std::string fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"; // Example path on Linux
 #endif
 
-float getHandAngle(unsigned int elapsedTime){
-    return (elapsedTime / 60000.0f) * 360.0f;
+float getHandAngle(unsigned int elapsedTime, float secondsPerRotation){
+    return (elapsedTime / (secondsPerRotation * 1000.0f)) * 360.0f;
 }
 
-void drawHand(unsigned int elapsedTime, sf::Vector2f position, sf::RenderWindow& window, sf::Vector2f size){
+void drawHand(unsigned int elapsedTime, sf::Vector2f position, sf::RenderWindow& window, sf::Vector2f size, sf::Color colour, float secondsPerRotation){
     sf::RectangleShape clockHand(size);
     clockHand.setOrigin(clockHand.getSize().x / 2, clockHand.getSize().y);
     clockHand.setPosition(position);
-    clockHand.setFillColor(sf::Color::Black);
+    clockHand.setFillColor(colour);
 
-    float handAngle = getHandAngle(elapsedTime);
+    float handAngle = getHandAngle(elapsedTime, secondsPerRotation);
 
     clockHand.setRotation(handAngle);
     window.draw(clockHand);

@@ -13,10 +13,19 @@
 #include <SFML/Graphics.hpp>
 #include <chrono>
 
-float getHandAngle(unsigned int elapsedTime);
+float getHandAngle(unsigned int elapsedTime, float secondsPerRotation);
 
-void drawHand(unsigned int elapsedTime, sf::Vector2f position, sf::RenderWindow& window, sf::Vector2f size = sf::Vector2f(10, 200));
-void showTime(unsigned int elapsedTime, sf::Vector2f position, sf::RenderWindow& window, int fontSize = 24);
+void drawHand(unsigned int elapsedTime,
+              sf::Vector2f position,
+              sf::RenderWindow& window,
+              sf::Vector2f size = sf::Vector2f(10, 200),
+              sf::Color colour = sf::Color::Black,
+              float secondsPerRotation = 60.0f);
+
+void showTime(unsigned int elapsedTime,
+              sf::Vector2f position,
+              sf::RenderWindow& window,
+              int fontSize = 24);
 
 
 class button {
