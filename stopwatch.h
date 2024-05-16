@@ -14,7 +14,9 @@
 #include <chrono>
 
 float getHandAngle(unsigned int elapsedTime);
-void drawHand(unsigned int elapsedTime, sf::Vector2f position, sf::Vector2f size);
+
+void drawHand(unsigned int elapsedTime, sf::Vector2f position, sf::RenderWindow& window, sf::Vector2f size = sf::Vector2f(10, 200));
+void showTime(unsigned int elapsedTime, sf::Vector2f position, sf::RenderWindow& window, int fontSize = 24);
 
 
 class button {
@@ -29,6 +31,8 @@ public:
     void setPos(sf::Vector2f n_pos);
     void setSize(sf::Vector2f n_size);
     void setColour(sf::Color n_colour);
+
+    bool isMe(sf::Vector2i position);
 
     void paint(sf::RenderWindow& window);
 };

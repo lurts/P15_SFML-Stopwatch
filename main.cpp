@@ -18,12 +18,13 @@
 #endif
 
 //Konstanten
-const unsigned int      width           = 900;
-const unsigned int      height          = 600;
-const unsigned int      buttonWidth     = 300;
-//const unsigned int      buttonHeight    = 200;
+const int width     = 900;
+const int height    = 600;
 
-const unsigned int buttonHeight = height/3;
+
+const int radius    = (height - 100)/2;
+const int buttonWidth = width/3;
+const int buttonHeight = height/3;
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(width, height), "Dies ist eine Stoppuhr, wer was anderes sagt der lugt!");
@@ -34,8 +35,8 @@ int main() {
     button* resetButton     = new button(sf::Vector2f(buttonWidth, buttonHeight), sf::Vector2f(width-buttonWidth, 2*buttonHeight),  sf::Color::Blue);
 
     bool stopwatchActive = false;
-    float handAngle = 0.;
     std::chrono::time_point startTime = std::chrono::high_resolution_clock::now();
+    unsigned int elapsedTime = 0;
 
     // Create a font for text
     sf::Font font;
@@ -45,20 +46,9 @@ int main() {
     }
 
     //Circle mit Farbe #B00B69 in der Mitte anzeigen
-    unsigned int radius = 255;
     sf::CircleShape circle(radius, 50);
     circle.setPosition((width-buttonWidth)/2-radius, height/2-radius);
     circle.setFillColor(sf::Color::White);
-
-    sf::RectangleShape clockHand(sf::Vector2f(10,250));
-    clockHand.setOrigin(clockHand.getSize().x / 2, clockHand.getSize().y);
-    clockHand.setPosition((width - buttonWidth) / 2, height / 2);
-    clockHand.setFillColor(sf::Color::Black);
-
-    sf::Text timeDisplay("", font, 24);
-    timeDisplay.setFillColor(sf::Color::Black);
-    timeDisplay.setPosition(50, height - 50);
-    timeDisplay.setString("00:00:00:000");
 
     while (window.isOpen())
     {
@@ -73,7 +63,7 @@ int main() {
                     sf::Vector2i mousePos = sf::Mouse::getPosition(window);
 
                 //Start button event
-                if ((mousePos.x > width-buttonWidth) && (0 < mousePos.y && mousePos.y < buttonHeight)) {
+                if (startButton->isMe(mousePos)){
                     //enable stopwatch and mark start time
                     stopwatchActive = true;
                     startTime = std::chrono::high_resolution_clock::now();
@@ -82,7 +72,7 @@ int main() {
                 }
 
                 //stop button event
-                if ((mousePos.x > width-buttonWidth) && (buttonHeight < mousePos.y && mousePos.y < 2*buttonHeight)){
+                if (stopButton->isMe(mousePos)){
                     //disable stopwatch
                     stopwatchActive = false;
 
@@ -90,8 +80,8 @@ int main() {
                 }
 
                 //reset button event, but only when the stopwatch is stopped
-                if ((mousePos.x > width-buttonWidth) && (2*buttonHeight < mousePos.y) && !stopwatchActive){
-                    handAngle = 0;
+                if (resetButton->isMe(mousePos) && !stopwatchActive){
+                    elapsedTime = 0;
 
                     std::cout << "reset" << std::endl;
                 }
@@ -100,25 +90,7 @@ int main() {
 
         if (stopwatchActive){
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime);
-            unsigned int elapsedTime = duration.count();
-
-            handAngle = getHandAngle(elapsedTime);
-
-            std::cout << elapsedTime << "\t" << handAngle << std::endl;
-
-            // Calculate hours, minutes, seconds, and milliseconds
-            unsigned int hours = elapsedTime / (1000 * 60 * 60);
-            unsigned int minutes = (elapsedTime % (1000 * 60 * 60)) / (1000 * 60);
-            unsigned int seconds = ((elapsedTime % (1000 * 60 * 60)) % (1000 * 60)) / 1000;
-            unsigned int milliseconds = elapsedTime % 1000;
-
-            std::stringstream timeString;
-            timeString << std::setfill('0') << std::setw(2) << hours << ":"
-               << std::setfill('0') << std::setw(2) << minutes << ":"
-               << std::setfill('0') << std::setw(2) << seconds << ":"
-               << std::setfill('0') << std::setw(3) << milliseconds;
-
-            timeDisplay.setString(timeString.str());
+            elapsedTime = duration.count();
         }
 
 
@@ -127,10 +99,15 @@ int main() {
 
         window.draw(circle);
 
-        clockHand.setRotation(handAngle);
-        window.draw(clockHand);
 
-        window.draw(timeDisplay);
+        showTime(elapsedTime,
+                 sf::Vector2f(50, height - 50),
+                 window);
+
+        drawHand(elapsedTime,
+                 sf::Vector2f((width - buttonWidth) / 2, height / 2),
+                 window,
+                 sf::Vector2f(10,radius - 50));
 
         startButton->paint(window);
         stopButton->paint(window);
@@ -138,8 +115,6 @@ int main() {
 
         /* --Aktualisiere Inhalt im Fenster. */
         window.display();
-
-        //std::cout << handAngle << "\t\t" << stopwatchActive << std::endl;
     }
 
     delete startButton;
