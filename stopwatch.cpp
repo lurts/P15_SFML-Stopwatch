@@ -6,7 +6,19 @@
 //-
 
 #include "stopwatch.h"
+#include <SFML/Graphics.hpp>
+#include <chrono>
 
+float getHandAngle(unsigned int elapsedTime){
+    return (elapsedTime / 60000.0f) * 360.0f;
+}
+
+void drawHand(unsigned int elapsedTime, sf::Vector2f position, sf::Vector2f size){
+
+}
+
+
+//Functions for the button class
 void button::setPos(sf::Vector2f nPosition){
     bPos = nPosition;
 }

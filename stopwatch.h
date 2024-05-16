@@ -11,6 +11,11 @@
 #endif //P15_SFML_STOPWATCH_STOPWATCH_H
 
 #include <SFML/Graphics.hpp>
+#include <chrono>
+
+float getHandAngle(unsigned int elapsedTime);
+void drawHand(unsigned int elapsedTime, sf::Vector2f position, sf::Vector2f size);
+
 
 class button {
 private:
