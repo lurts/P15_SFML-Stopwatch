@@ -17,8 +17,8 @@
 #endif
 
 //Konstanten
-const int width     = 900;
-const int height    = 600;
+const int width     = 1200;
+const int height    = 800;
 
 const int buttonWidth = width/3;
 const int buttonHeight = height/3;
@@ -42,6 +42,13 @@ int main() {
     button* stopButton      = new button(sf::Vector2f(buttonWidth, buttonHeight), sf::Vector2f(width-buttonWidth, buttonHeight),    sf::Color::Red);
     button* resetButton     = new button(sf::Vector2f(buttonWidth, buttonHeight), sf::Vector2f(width-buttonWidth, 2*buttonHeight),  sf::Color::Blue);
 
+    button* framerateToggle = new button(sf::Vector2f(50.0f, 50.0f), sf::Vector2f(0, 0), sf::Color(0xb0849dff));
+
+    clockHand* secondsHand  = new clockHand(1000.0f,    sf::Vector2f((width - buttonWidth) / 2, height / 2), sf::Vector2f(10,radius - 75), sf::Color::Red);
+    clockHand* minuteHand   = new clockHand(60000.0f,   sf::Vector2f((width - buttonWidth) / 2, height / 2), sf::Vector2f(10,radius - 50), sf::Color::Black);
+
+    stopwatch* sw           = new stopwatch();
+
     //Circle mit Farbe #B00B69 in der Mitte anzeigen
     sf::CircleShape circle(radius, 50);
     circle.setPosition((width-buttonWidth)/2-radius, height/2-radius);
@@ -52,9 +59,15 @@ int main() {
     smallCircle.setPosition((width - buttonWidth) / 2 - smallRadius, height / 2 - smallRadius);
     smallCircle.setFillColor(sf::Color::Black);
 
+    sf::Text fpsDisplay("60", font, 24);
+    fpsDisplay.setFillColor(sf::Color::Black);
+    fpsDisplay.setPosition(sf::Vector2f(5, 5));
 
+
+
+    int framerateLimit          = 60;
     sf::RenderWindow window(sf::VideoMode(width, height), "Dies ist eine Stoppuhr, wer was anderes sagt der lugt!", sf::Style::Close);
-    window.setFramerateLimit(60);
+    window.setFramerateLimit(framerateLimit);
 
     while (window.isOpen())
     {
@@ -70,41 +83,42 @@ int main() {
                     sf::Vector2i mousePos = sf::Mouse::getPosition(window);
 
                 //Start button event
-                if (startButton->isMe(mousePos) && !stopwatchActive){
-                    //enable stopwatch and mark start time
-                    stopwatchActive = true;
-                    startTime = std::chrono::high_resolution_clock::now();
-
-                    std::cout << "start" << std::endl;
+                if (startButton->isMe(mousePos)){
+                    sw->start();
                 }
 
                 //stop button event
-                if (stopButton->isMe(mousePos) && stopwatchActive){
-                    //save time in case we want to resume
-                    savedTime = elapsedTime;
-                    std::cout << "Time (ms): " << elapsedTime << std::endl;
+                if (stopButton->isMe(mousePos)){
+                    sw->stop();
 
-                    stopwatchActive = false;
-
-                    std::cout << "stop" << std::endl;
                 }
 
                 //reset button event, but only when the stopwatch is stopped
-                if (resetButton->isMe(mousePos) && !stopwatchActive){
-                    elapsedTime = 0;
-                    savedTime = 0;
+                if (resetButton->isMe(mousePos)){
+                    sw->reset();
+                }
 
-                    std::cout << "reset" << std::endl;
+                //framerate toggle button event
+                if (framerateToggle->isMe(mousePos)){
+                    if (framerateLimit == 60) {
+                        framerateLimit = 144;
+                        framerateToggle->setColour(sf::Color(0xb00b69ff));
+                        fpsDisplay.setString("144");
+                    }
+                    else {
+                        framerateLimit = 60;
+                        framerateToggle->setColour(sf::Color(0xb0849dff));
+                        fpsDisplay.setString("60");
+                    }
+
+                    window.setFramerateLimit(framerateLimit);
                 }
             }
         }
 
-        //as long as the stopwatch is allowed to do stopwatch things we keep updating the elapsedTime with the current time
-        if (stopwatchActive){
-            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime);
-            elapsedTime = duration.count();
-            elapsedTime += savedTime;
-        }
+
+        sw->update();
+        elapsedTime = sw->getElapsedTime();
 
 
         //Clear the screen with a solid colour, so we can draw new and exciting things
@@ -115,40 +129,25 @@ int main() {
 
         //this function is responsible for the digital readout at the bottom of the window
         showTime(elapsedTime,
-                 sf::Vector2f(50, height - 50),
-                 window);
-
-        //Rotate once a second
-        drawHand(elapsedTime,
-                 sf::Vector2f((width - buttonWidth) / 2, height / 2),
+                 sf::Vector2f(50, height - 50 - 24),
                  window,
-                 sf::Vector2f(10,radius - 50),
-                 sf::Color::Red,
-                 1.0f);
+                 font);
 
-        //rotate once a minute
-        drawHand(elapsedTime,
-                 sf::Vector2f((width - buttonWidth) / 2, height / 2),
-                 window,
-                 sf::Vector2f(10,radius - 50),
-                 sf::Color::Black,
-                 60.0f);
-
-        //rotate once a hour
-        drawHand(elapsedTime,
-                 sf::Vector2f((width - buttonWidth) / 2, height / 2),
-                 window,
-                 sf::Vector2f(10,radius - 50),
-                 sf::Color::Green,
-                 60.0f*60.0f);
+        //update the clock hands
+        secondsHand->paint(elapsedTime, window);
+        minuteHand->paint(elapsedTime, window);
 
         //make the buttons show up
         startButton->paint(window);
         stopButton->paint(window);
         resetButton->paint(window);
 
+        framerateToggle->paint(window);
+
         //add a small circle to cover up where all the hands meet because without it it looks UGLY
         window.draw(smallCircle);
+
+        window.draw(fpsDisplay);
 
         //refresh the window and finally display everything
         window.display();
@@ -158,6 +157,11 @@ int main() {
     delete startButton;
     delete stopButton;
     delete resetButton;
+
+    delete secondsHand;
+    delete minuteHand;
+
+    delete sw;
 
     return 1;
 }

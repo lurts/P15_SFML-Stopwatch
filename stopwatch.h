@@ -15,16 +15,10 @@
 
 float getHandAngle(unsigned int elapsedTime, float secondsPerRotation);
 
-void drawHand(unsigned int elapsedTime,
-              sf::Vector2f position,
-              sf::RenderWindow& window,
-              sf::Vector2f size = sf::Vector2f(10, 200),
-              sf::Color colour = sf::Color::Black,
-              float secondsPerRotation = 60.0f);
-
 void showTime(unsigned int elapsedTime,
               sf::Vector2f position,
               sf::RenderWindow& window,
+              sf::Font font,
               int fontSize = 24);
 
 
@@ -44,4 +38,47 @@ public:
     bool isMe(sf::Vector2i position);
 
     void paint(sf::RenderWindow& window);
+};
+
+
+
+class clockHand {
+private:
+    int             msPerRev;
+    sf::Vector2f    hPos;
+    sf::Vector2f    hSize;
+    sf::Color       hColour;
+
+public:
+    clockHand(int n_msPerRev, sf::Vector2f n_hPos, sf::Vector2f n_hSize, sf::Color n_hColour = sf::Color::Black)
+            : msPerRev(n_msPerRev), hPos(n_hPos), hSize(n_hSize), hColour(n_hColour) {}
+
+    void setPos(sf::Vector2f n_hPos);
+    void setSize(sf::Vector2f n_hSize);
+    void setColour(sf::Color n_hColour);
+
+    void paint(unsigned int elapsedTime, sf::RenderWindow& window);
+};
+
+
+
+class stopwatch {
+private:
+    unsigned int elapsedTime;
+    unsigned int savedTime;
+    std::chrono::high_resolution_clock ::time_point startTime;
+
+    bool stopwatchActive;
+
+public:
+    stopwatch() : stopwatchActive(false), elapsedTime(0), savedTime(0) {}
+
+    void start();
+    void stop();
+    void reset();
+
+    void update();
+
+    bool isActive();
+    int getElapsedTime();
 };

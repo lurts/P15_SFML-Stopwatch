@@ -11,35 +11,11 @@
 #include <iostream>
 
 
-#ifdef _WIN32
-const std::string fontPath = "C:/Windows/Fonts/arial.ttf";
-#elif __linux__
-const std::string fontPath = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"; // Example path on Linux
-#endif
-
-float getHandAngle(unsigned int elapsedTime, float secondsPerRotation){
-    return (elapsedTime / (secondsPerRotation * 1000.0f)) * 360.0f;
+float getHandAngle(unsigned int elapsedTime, float msPerRotation){
+    return (elapsedTime / (msPerRotation)) * 360.0f;
 }
 
-void drawHand(unsigned int elapsedTime, sf::Vector2f position, sf::RenderWindow& window, sf::Vector2f size, sf::Color colour, float secondsPerRotation){
-    sf::RectangleShape clockHand(size);
-    clockHand.setOrigin(clockHand.getSize().x / 2, clockHand.getSize().y);
-    clockHand.setPosition(position);
-    clockHand.setFillColor(colour);
-
-    float handAngle = getHandAngle(elapsedTime, secondsPerRotation);
-
-    clockHand.setRotation(handAngle);
-    window.draw(clockHand);
-}
-
-void showTime(unsigned int elapsedTime, sf::Vector2f position, sf::RenderWindow& window, int fontSize){
-    // Create a font for text
-    sf::Font font;
-    if (!font.loadFromFile(fontPath)) {
-        std::cerr << "Failed to load font" << std::endl;
-        return;
-    }
+void showTime(unsigned int elapsedTime, sf::Vector2f position, sf::RenderWindow& window, sf::Font font, int fontSize){
 
     sf::Text timeDisplay("", font, fontSize);
     timeDisplay.setFillColor(sf::Color::Black);
@@ -78,7 +54,8 @@ void button::setColour(sf::Color nColour){
 }
 
 bool button::isMe(sf::Vector2i position){
-    return ((position.x > bPos.x) && (bPos.y < position.y && position.y < bPos.y + bSize.y));
+    return ((position.x > bPos.x && position.x < bPos.x + bSize.x) &&
+            (position.y > bPos.y && position.y < bPos.y + bSize.y));
 };
 
 void button::paint(sf::RenderWindow& window){
@@ -86,4 +63,72 @@ void button::paint(sf::RenderWindow& window){
     rect.setPosition(bPos);
     rect.setFillColor(bColour);
     window.draw(rect);
+}
+
+
+//Stuff for the clock hands
+void clockHand::setPos(sf::Vector2f n_hPos) {
+    hPos = n_hPos;
+}
+
+void clockHand::setSize(sf::Vector2f n_hSize) {
+    hSize = n_hSize;
+}
+
+void clockHand::setColour(sf::Color n_hColour) {
+    hColour = n_hColour;
+}
+
+void clockHand::paint(unsigned int elapsedTime, sf::RenderWindow &window) {
+    sf::RectangleShape clockHand(hSize);
+    clockHand.setOrigin(clockHand.getSize().x / 2, clockHand.getSize().y);
+    clockHand.setPosition(hPos);
+    clockHand.setFillColor(hColour);
+
+    float handAngle = getHandAngle(elapsedTime, msPerRev);
+
+    clockHand.setRotation(handAngle);
+    window.draw(clockHand);
+}
+
+
+//main stopwatch things
+void stopwatch::start(){
+    if (!stopwatchActive) {
+        stopwatchActive = true;
+        startTime = std::chrono::high_resolution_clock::now();
+        std::cout << "Start" << std::endl;
+    }
+}
+
+void stopwatch::stop() {
+    if (stopwatchActive) {
+        savedTime = elapsedTime;
+        stopwatchActive = false;
+        std::cout << "Stop. Time (ms): " << elapsedTime << std::endl;
+    }
+}
+
+void stopwatch::reset() {
+    if (!stopwatchActive) {
+        elapsedTime = 0;
+        savedTime = 0;
+        std::cout << "Reset" << std::endl;
+    }
+}
+
+void stopwatch::update() {
+    if (stopwatchActive){
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime);
+        elapsedTime = duration.count();
+        elapsedTime += savedTime;
+    }
+}
+
+bool stopwatch::isActive() {
+    return stopwatchActive;
+}
+
+int stopwatch::getElapsedTime() {
+    return elapsedTime;
 }
