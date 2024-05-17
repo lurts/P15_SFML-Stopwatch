@@ -8,7 +8,6 @@
 #include <iostream>
 #include <SFML/Graphics.hpp>
 #include <chrono>
-#include <iomanip>
 #include "stopwatch.h"
 
 #ifdef _WIN32
@@ -21,19 +20,12 @@
 const int width     = 900;
 const int height    = 600;
 
-
-const int radius    = (height - 100)/2;
 const int buttonWidth = width/3;
 const int buttonHeight = height/3;
 
+const int radius    = std::min((height - 100) / 2, (width - buttonWidth - 100) / 2);
+
 int main() {
-    sf::RenderWindow window(sf::VideoMode(width, height), "Dies ist eine Stoppuhr, wer was anderes sagt der lugt!");
-    window.setFramerateLimit(60);
-
-    button* startButton     = new button(sf::Vector2f(buttonWidth, buttonHeight), sf::Vector2f(width-buttonWidth, 0),               sf::Color::Green);
-    button* stopButton      = new button(sf::Vector2f(buttonWidth, buttonHeight), sf::Vector2f(width-buttonWidth, buttonHeight),    sf::Color::Red);
-    button* resetButton     = new button(sf::Vector2f(buttonWidth, buttonHeight), sf::Vector2f(width-buttonWidth, 2*buttonHeight),  sf::Color::Blue);
-
     bool stopwatchActive = false;
     std::chrono::time_point startTime = std::chrono::high_resolution_clock::now();
     unsigned int elapsedTime = 0;
@@ -46,10 +38,23 @@ int main() {
         return 1;
     }
 
+    button* startButton     = new button(sf::Vector2f(buttonWidth, buttonHeight), sf::Vector2f(width-buttonWidth, 0),               sf::Color::Green);
+    button* stopButton      = new button(sf::Vector2f(buttonWidth, buttonHeight), sf::Vector2f(width-buttonWidth, buttonHeight),    sf::Color::Red);
+    button* resetButton     = new button(sf::Vector2f(buttonWidth, buttonHeight), sf::Vector2f(width-buttonWidth, 2*buttonHeight),  sf::Color::Blue);
+
     //Circle mit Farbe #B00B69 in der Mitte anzeigen
     sf::CircleShape circle(radius, 50);
     circle.setPosition((width-buttonWidth)/2-radius, height/2-radius);
     circle.setFillColor(sf::Color::White);
+
+    int smallRadius = radius / 25;
+    sf::CircleShape smallCircle(smallRadius, 50);
+    smallCircle.setPosition((width - buttonWidth) / 2 - smallRadius, height / 2 - smallRadius);
+    smallCircle.setFillColor(sf::Color::Black);
+
+
+    sf::RenderWindow window(sf::VideoMode(width, height), "Dies ist eine Stoppuhr, wer was anderes sagt der lugt!", sf::Style::Close);
+    window.setFramerateLimit(60);
 
     while (window.isOpen())
     {
@@ -59,6 +64,7 @@ int main() {
         {
             if (event.type == sf::Event::Closed)
                 window.close();
+
 
             if ((event.type == sf::Event::MouseButtonPressed) && (event.mouseButton.button == sf::Mouse::Left)) {
                     sf::Vector2i mousePos = sf::Mouse::getPosition(window);
@@ -76,6 +82,7 @@ int main() {
                 if (stopButton->isMe(mousePos) && stopwatchActive){
                     //save time in case we want to resume
                     savedTime = elapsedTime;
+                    std::cout << "Time (ms): " << elapsedTime << std::endl;
 
                     stopwatchActive = false;
 
@@ -92,6 +99,7 @@ int main() {
             }
         }
 
+        //as long as the stopwatch is allowed to do stopwatch things we keep updating the elapsedTime with the current time
         if (stopwatchActive){
             auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - startTime);
             elapsedTime = duration.count();
@@ -99,12 +107,13 @@ int main() {
         }
 
 
-        /* --Loesche Bildschirminhalt. */
+        //Clear the screen with a solid colour, so we can draw new and exciting things
         window.clear(sf::Color(0x6e6e6eff));
 
+        //draw the first circle, how exciting
         window.draw(circle);
 
-
+        //this function is responsible for the digital readout at the bottom of the window
         showTime(elapsedTime,
                  sf::Vector2f(50, height - 50),
                  window);
@@ -133,14 +142,19 @@ int main() {
                  sf::Color::Green,
                  60.0f*60.0f);
 
+        //make the buttons show up
         startButton->paint(window);
         stopButton->paint(window);
         resetButton->paint(window);
 
-        /* --Aktualisiere Inhalt im Fenster. */
+        //add a small circle to cover up where all the hands meet because without it it looks UGLY
+        window.draw(smallCircle);
+
+        //refresh the window and finally display everything
         window.display();
     }
 
+    //gotta get rid of those objects
     delete startButton;
     delete stopButton;
     delete resetButton;

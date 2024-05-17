@@ -7,7 +7,6 @@
 
 #include "stopwatch.h"
 #include <SFML/Graphics.hpp>
-#include <chrono>
 #include <iomanip>
 #include <iostream>
 

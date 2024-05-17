@@ -5,6 +5,7 @@ set(PROJECT_NAME P15_SFML_Stopwatch)
 
 project(${PROJECT_NAME})
 
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -static-libgcc")
 
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 
