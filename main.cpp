@@ -42,7 +42,6 @@ int main() {
     button* stopButton      = new button(sf::Vector2f(buttonWidth, buttonHeight), sf::Vector2f(width-buttonWidth, buttonHeight),    sf::Color::Red);
     button* resetButton     = new button(sf::Vector2f(buttonWidth, buttonHeight), sf::Vector2f(width-buttonWidth, 2*buttonHeight),  sf::Color::Blue);
 
-    button* framerateToggle = new button(sf::Vector2f(50.0f, 50.0f), sf::Vector2f(0, 0), sf::Color(0xb0849dff));
 
     clockHand* secondsHand  = new clockHand(1000.0f,    sf::Vector2f((width - buttonWidth) / 2, height / 2), sf::Vector2f(10,radius - 75), sf::Color::Red);
     clockHand* minuteHand   = new clockHand(60000.0f,   sf::Vector2f((width - buttonWidth) / 2, height / 2), sf::Vector2f(10,radius - 50), sf::Color::Black);
@@ -59,59 +58,36 @@ int main() {
     smallCircle.setPosition((width - buttonWidth) / 2 - smallRadius, height / 2 - smallRadius);
     smallCircle.setFillColor(sf::Color::Black);
 
-    sf::Text fpsDisplay("60", font, 24);
-    fpsDisplay.setFillColor(sf::Color::Black);
-    fpsDisplay.setPosition(sf::Vector2f(5, 5));
-
-
 
     int framerateLimit          = 60;
     sf::RenderWindow window(sf::VideoMode(width, height), "Dies ist eine Stoppuhr, wer was anderes sagt der lugt!", sf::Style::Close);
     window.setFramerateLimit(framerateLimit);
 
-    while (window.isOpen())
-    {
+    while (window.isOpen()) {
         sf::Event event;
 
-        while (window.pollEvent(event))
-        {
+        while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed)
                 window.close();
 
 
             if ((event.type == sf::Event::MouseButtonPressed) && (event.mouseButton.button == sf::Mouse::Left)) {
-                    sf::Vector2i mousePos = sf::Mouse::getPosition(window);
+                sf::Vector2i mousePos = sf::Mouse::getPosition(window);
 
                 //Start button event
-                if (startButton->isMe(mousePos)){
+                if (startButton->isMe(mousePos)) {
                     sw->start();
                 }
 
                 //stop button event
-                if (stopButton->isMe(mousePos)){
+                if (stopButton->isMe(mousePos)) {
                     sw->stop();
 
                 }
 
                 //reset button event, but only when the stopwatch is stopped
-                if (resetButton->isMe(mousePos)){
+                if (resetButton->isMe(mousePos)) {
                     sw->reset();
-                }
-
-                //framerate toggle button event
-                if (framerateToggle->isMe(mousePos)){
-                    if (framerateLimit == 60) {
-                        framerateLimit = 144;
-                        framerateToggle->setColour(sf::Color(0xb00b69ff));
-                        fpsDisplay.setString("144");
-                    }
-                    else {
-                        framerateLimit = 60;
-                        framerateToggle->setColour(sf::Color(0xb0849dff));
-                        fpsDisplay.setString("60");
-                    }
-
-                    window.setFramerateLimit(framerateLimit);
                 }
             }
         }
@@ -142,16 +118,13 @@ int main() {
         stopButton->paint(window);
         resetButton->paint(window);
 
-        framerateToggle->paint(window);
-
         //add a small circle to cover up where all the hands meet because without it it looks UGLY
         window.draw(smallCircle);
-
-        window.draw(fpsDisplay);
 
         //refresh the window and finally display everything
         window.display();
     }
+
 
     //gotta get rid of those objects
     delete startButton;
